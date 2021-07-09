@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Timers;
 
 namespace PropHuntScraper
@@ -18,27 +19,18 @@ namespace PropHuntScraper
         {
             Console.WriteLine("PropHuntScraper is being configured.");
 
-            // Timer
-            Timer Timer = new Timer(3600000);
-            Timer.Elapsed += StartScraping;
-            Timer.AutoReset = true;
-            Timer.Enabled = true;
-
             // Redmine API
             _rm = new RedmineManager("https://redmine.koertlichtendonk.nl/", "f35cb859d29933894c7bd3e7ff006d262d9e420b", MimeFormat.Json, false);
 
             // Force first scraping process
             Console.WriteLine("PropHuntScraper is starting first scraping process.");
-            StartScraping(null, null);
+            StartScraping();
             Console.WriteLine("PropHuntScraper is ending the first scraping process.");
         }
 
-        private static void StartScraping(object sender, ElapsedEventArgs e)
+        private static void StartScraping()
         {
-            if (e != null)
-            {
-                Console.WriteLine("PropHuntScraper is starting the scraping process at {0:HH:mm:ss.fff}", e.SignalTime);
-            }
+            Console.WriteLine("PropHuntScraper is starting the scraping process at {0:HH:mm:ss.fff}", DateTime.Now);
 
             var service = FirefoxDriverService.CreateDefaultService();
             service.HideCommandPromptWindow = true;
@@ -112,6 +104,18 @@ namespace PropHuntScraper
             var AllIssuesFromProject = RedmineHelper.GetAllIssuesFromProject(true, project.Id.ToString());
             Console.WriteLine("End of getting all issues from project.");
 
+            Console.WriteLine("Begin removal of old issues from project.");
+            foreach(KeyValuePair<string, Issue> IssueFromProject in AllIssuesFromProject)
+            {
+                if(!unownedHouses.Any(i => i.address == IssueFromProject.Key))
+                {
+                    Program._rm.DeleteObject<Issue>(IssueFromProject.Value.Id.ToString(), null);
+
+                    Console.WriteLine("Removing issue for house " + IssueFromProject.Value.Subject + " from Redmine.");
+                }
+            }
+            Console.WriteLine("End of removal of old issues from project.");
+
             foreach (HouseInfo house in unownedHouses)
             {
                 if(!AllIssuesFromProject.ContainsKey(house.address))
@@ -121,7 +125,7 @@ namespace PropHuntScraper
                     new_issue.Project = IdentifiableName.Create<Project>(project.Id);
                     new_issue.Subject = house.address;
                     RedmineHelper.GetAllTrackers().TryGetValue("Todo", out Tracker tracker);
-                    new_issue.Status = IdentifiableName.Create<Tracker>(tracker.Id);
+                    new_issue.Status = IdentifiableName.Create<IdentifiableName>(tracker.Id);
                     new_issue.AssignedTo = IdentifiableName.Create<IdentifiableName>( RedmineHelper.GetAllUsers().First().Value.Id );
                     RedmineHelper.GetAllStatuses().TryGetValue("New", out IssueStatus issueStatus);
                     new_issue.Tracker = IdentifiableName.Create<IssueStatus>(issueStatus.Id);
@@ -136,6 +140,12 @@ namespace PropHuntScraper
                     Console.WriteLine("House " + house.address + " is already on Redmine.");
                 }
             }
+
+            Driver.Close();
+
+            Console.WriteLine("Waiting for the timer to elapse.");
+            Thread.Sleep(3600000);
+            StartScraping();
         }
     }
 }

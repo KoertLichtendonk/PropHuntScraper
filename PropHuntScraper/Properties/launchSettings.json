@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "PropHuntScraper": {
+      "commandName": "Project"
+    },
+    "Docker": {
+      "commandName": "Docker"
+    }
+  }
+}
