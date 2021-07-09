@@ -34,7 +34,7 @@ namespace PropHuntScraper
                 NameValueCollection parameters = new NameValueCollection { { "project_id", project_id }, { "status_id", "*" } };
                 foreach (var Issue in Program._rm.GetObjects<Issue>(parameters))
                 {
-                    _AllIssuesFromProject.Add(String.Format("#{0}: {1}", Issue.Id, Issue.Subject), Issue);
+                    _AllIssuesFromProject.Add(String.Format("{0}", Issue.Subject), Issue);
                 }
             }
             return _AllIssuesFromProject;

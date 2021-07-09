@@ -114,7 +114,7 @@ namespace PropHuntScraper
 
             foreach (HouseInfo house in unownedHouses)
             {
-                if(!AllIssuesFromProject.Keys.Any(i => i.Contains(house.address)))
+                if(!AllIssuesFromProject.ContainsKey(house.address))
                 {
                     Issue new_issue = new Issue();
 
