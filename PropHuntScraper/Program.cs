@@ -129,7 +129,7 @@ namespace PropHuntScraper
                     new_issue.StartDate = DateTime.Now;
 
                     Console.WriteLine("Sending house "+ house.address +" to Redmine.");
-                    Program._rm.CreateObjectAsync(new_issue);
+                    Program._rm.CreateObject(new_issue);
                     Console.WriteLine("Sent house " + house.address + " to Redmine.");
                 } else
                 {
