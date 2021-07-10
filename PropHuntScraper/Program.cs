@@ -20,7 +20,7 @@ namespace PropHuntScraper
             Console.WriteLine("PropHuntScraper is being configured.");
 
             // Redmine API
-            _rm = new RedmineManager("https://redmine.koertlichtendonk.nl/", "f35cb859d29933894c7bd3e7ff006d262d9e420b", MimeFormat.Json, false);
+            _rm = new RedmineManager("https://redmine.koertlichtendonk.nl/", "3a815afbcb267323295b7b07e11037d0b0f628d8", MimeFormat.Json, false);
 
             // Force first scraping process
             Console.WriteLine("PropHuntScraper is starting first scraping process.");
